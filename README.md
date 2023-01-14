@@ -7,3 +7,4 @@ cmake ..
 make  
 sudo ./onnx2trt ../models/yolov8n-seg.onnx ../models/yolov8n-seg.engine  
 sudo ./trt_infer ../models/yolov8n-seg.onnx ../images/bus.jpg  
+![image](https://github.com/fish-kong/Yolov8-instance-seg-tensorrt/blob/main/x.jpg)
