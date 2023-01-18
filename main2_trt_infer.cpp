@@ -29,14 +29,14 @@ const char* OUTPUT_BLOB_NAME1 = "output1";//mask
 
 
 struct OutputSeg {
-	int id;             //½á¹ûÀà±ğid
-	float confidence;   //½á¹ûÖÃĞÅ¶È
-	cv::Rect box;       //¾ØĞÎ¿ò
-	cv::Mat boxMask;       //¾ØĞÎ¿òÄÚmask£¬½ÚÊ¡ÄÚ´æ¿Õ¼äºÍ¼Ó¿ìËÙ¶È
+	int id;             //ç»“æœç±»åˆ«id
+	float confidence;   //ç»“æœç½®ä¿¡åº¦
+	cv::Rect box;       //çŸ©å½¢æ¡†
+	cv::Mat boxMask;       //çŸ©å½¢æ¡†å†…maskï¼ŒèŠ‚çœå†…å­˜ç©ºé—´å’ŒåŠ å¿«é€Ÿåº¦
 };
 
 void DrawPred(Mat& img,std:: vector<OutputSeg> result) {
-	//Éú³ÉËæ»úÑÕÉ«
+	//ç”Ÿæˆéšæœºé¢œè‰²
 	std::vector<Scalar> color;
 	srand(time(0));
 	for (int i = 0; i < CLASSES; i++) {
@@ -64,7 +64,7 @@ void DrawPred(Mat& img,std:: vector<OutputSeg> result) {
 		putText(img, label, Point(left, top), FONT_HERSHEY_SIMPLEX, 1, color[result[i].id], 2);
 	}
 	
-	addWeighted(img, 0.5, mask, 0.8, 1, img); //½«mask¼ÓÔÚÔ­Í¼ÉÏÃæ
+	addWeighted(img, 0.5, mask, 0.8, 1, img); //å°†maskåŠ åœ¨åŸå›¾ä¸Šé¢
 
 	
 }
@@ -91,8 +91,8 @@ void doInference(IExecutionContext& context, float* input, float* output, float*
     CHECK(cudaMalloc(&buffers[inputIndex], batchSize * 3 * INPUT_H * INPUT_W * sizeof(float)));//
 	CHECK(cudaMalloc(&buffers[outputIndex], batchSize * OUTPUT_SIZE * sizeof(float)));
 	CHECK(cudaMalloc(&buffers[outputIndex1], batchSize * OUTPUT_SIZE1 * sizeof(float)));
-	// cudaMalloc·ÖÅäÄÚ´æ cudaFreeÊÍ·ÅÄÚ´æ cudaMemcpy»ò cudaMemcpyAsync ÔÚÖ÷»úºÍÉè±¸Ö®¼ä´«ÊäÊı¾İ
-	// cudaMemcpy cudaMemcpyAsync ÏÔÊ½µØ×èÈû´«Êä ÏÔÊ½µØ·Ç×èÈû´«Êä 
+	// cudaMallocåˆ†é…å†…å­˜ cudaFreeé‡Šæ”¾å†…å­˜ cudaMemcpyæˆ– cudaMemcpyAsync åœ¨ä¸»æœºå’Œè®¾å¤‡ä¹‹é—´ä¼ è¾“æ•°æ®
+	// cudaMemcpy cudaMemcpyAsync æ˜¾å¼åœ°é˜»å¡ä¼ è¾“ æ˜¾å¼åœ°éé˜»å¡ä¼ è¾“ 
     // Create stream
     cudaStream_t stream;
     CHECK(cudaStreamCreate(&stream));
@@ -120,22 +120,22 @@ int main(int argc, char** argv)
 		argv[2] = "../images/bus.jpg";
 	}
 	// create a model using the API directly and serialize it to a stream
-	char* trtModelStream{ nullptr }; //char* trtModelStream==nullptr;  ¿ª±Ù¿ÕÖ¸Õëºó ÒªºÍnewÅäºÏÊ¹ÓÃ£¬±ÈÈç89ĞĞ trtModelStream = new char[size]
-	size_t size{ 0 };//Óëint¹Ì¶¨ËÄ¸ö×Ö½Ú²»Í¬ÓĞËù²»Í¬,size_tµÄÈ¡ÖµrangeÊÇÄ¿±êÆ½Ì¨ÏÂ×î´ó¿ÉÄÜµÄÊı×é³ß´ç,Ò»Ğ©Æ½Ì¨ÏÂsize_tµÄ·¶Î§Ğ¡ÓÚintµÄÕıÊı·¶Î§,ÓÖ»òÕß´óÓÚunsigned int. Ê¹ÓÃInt¼ÈÓĞ¿ÉÄÜÀË·Ñ£¬ÓÖÓĞ¿ÉÄÜ·¶Î§²»¹»´ó¡£
+	char* trtModelStream{ nullptr }; //char* trtModelStream==nullptr;  å¼€è¾Ÿç©ºæŒ‡é’ˆå è¦å’Œnewé…åˆä½¿ç”¨ï¼Œæ¯”å¦‚89è¡Œ trtModelStream = new char[size]
+	size_t size{ 0 };//ä¸intå›ºå®šå››ä¸ªå­—èŠ‚ä¸åŒæœ‰æ‰€ä¸åŒ,size_tçš„å–å€¼rangeæ˜¯ç›®æ ‡å¹³å°ä¸‹æœ€å¤§å¯èƒ½çš„æ•°ç»„å°ºå¯¸,ä¸€äº›å¹³å°ä¸‹size_tçš„èŒƒå›´å°äºintçš„æ­£æ•°èŒƒå›´,åˆæˆ–è€…å¤§äºunsigned int. ä½¿ç”¨Intæ—¢æœ‰å¯èƒ½æµªè´¹ï¼Œåˆæœ‰å¯èƒ½èŒƒå›´ä¸å¤Ÿå¤§ã€‚
 
 	std::ifstream file(argv[1], std::ios::binary);
 	if (file.good()) {
 		std::cout << "load engine success" << std::endl;
-		file.seekg(0, file.end);//Ö¸ÏòÎÄ¼şµÄ×îºóµØÖ·
-		size = file.tellg();//°ÑÎÄ¼ş³¤¶È¸æËß¸øsize
+		file.seekg(0, file.end);//æŒ‡å‘æ–‡ä»¶çš„æœ€ååœ°å€
+		size = file.tellg();//æŠŠæ–‡ä»¶é•¿åº¦å‘Šè¯‰ç»™size
 		//std::cout << "\nfile:" << argv[1] << " size is";
 		//std::cout << size << "";
 
-		file.seekg(0, file.beg);//Ö¸»ØÎÄ¼şµÄ¿ªÊ¼µØÖ·
-		trtModelStream = new char[size];//¿ª±ÙÒ»¸öchar ³¤¶ÈÊÇÎÄ¼şµÄ³¤¶È
+		file.seekg(0, file.beg);//æŒ‡å›æ–‡ä»¶çš„å¼€å§‹åœ°å€
+		trtModelStream = new char[size];//å¼€è¾Ÿä¸€ä¸ªchar é•¿åº¦æ˜¯æ–‡ä»¶çš„é•¿åº¦
 		assert(trtModelStream);//
-		file.read(trtModelStream, size);//½«ÎÄ¼şÄÚÈİ´«¸øtrtModelStream
-		file.close();//¹Ø±Õ
+		file.read(trtModelStream, size);//å°†æ–‡ä»¶å†…å®¹ä¼ ç»™trtModelStream
+		file.close();//å…³é—­
 	}
 	else {
 		std::cout << "load engine failed" << std::endl;
@@ -147,7 +147,7 @@ int main(int argc, char** argv)
 	if (src.empty()) { std::cout << "image load faild" << std::endl; return 1; }
 	int img_width = src.cols;
 	int img_height = src.rows;
-	std::cout << "¿í¸ß£º" << img_width << " " << img_height << std::endl;
+	std::cout << "å®½é«˜ï¼š" << img_width << " " << img_height << std::endl;
 	// Subtract mean from image
 	static float data[3 * INPUT_H * INPUT_W];
 	Mat pr_img0, pr_img;
@@ -159,7 +159,7 @@ int main(int argc, char** argv)
 	int i = 0;// [1,3,INPUT_H,INPUT_W]
 	//std::cout << "pr_img.step" << pr_img.step << std::endl;
 	for (int row = 0; row < INPUT_H; ++row) {
-		uchar* uc_pixel = pr_img.data + row * pr_img.step;//pr_img.step=widthx3 ¾ÍÊÇÃ¿Ò»ĞĞÓĞwidth¸ö3Í¨µÀµÄÖµ
+		uchar* uc_pixel = pr_img.data + row * pr_img.step;//pr_img.step=widthx3 å°±æ˜¯æ¯ä¸€è¡Œæœ‰widthä¸ª3é€šé“çš„å€¼
 		for (int col = 0; col < INPUT_W; ++col)
 		{
 
@@ -184,7 +184,7 @@ int main(int argc, char** argv)
 	static float prob[OUTPUT_SIZE];
 	static float prob1[OUTPUT_SIZE1];
 
-	//for (int i = 0; i < 10; i++) {//¼ÆËã10´ÎµÄÍÆÀíËÙ¶È
+	//for (int i = 0; i < 10; i++) {//è®¡ç®—10æ¬¡çš„æ¨ç†é€Ÿåº¦
 	//       auto start = std::chrono::system_clock::now();
 	//       doInference(*context, data, prob, prob1, 1);
 	//       auto end = std::chrono::system_clock::now();
@@ -193,22 +193,22 @@ int main(int argc, char** argv)
 	auto start = std::chrono::system_clock::now();
 	doInference(*context, data, prob, prob1, 1);
 	auto end = std::chrono::system_clock::now();
-	std::cout << "ÍÆÀíÊ±¼ä£º" << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
+	std::cout << "æ¨ç†æ—¶é—´ï¼š" << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
 
-	std::vector<int> classIds;//½á¹ûidÊı×é
-	std::vector<float> confidences;//½á¹ûÃ¿¸öid¶ÔÓ¦ÖÃĞÅ¶ÈÊı×é
-	std::vector<cv::Rect> boxes;//Ã¿¸öid¾ØĞÎ¿ò
-	std::vector<cv::Mat> picked_proposals;  //ºóĞø¼ÆËãmask
+	std::vector<int> classIds;//ç»“æœidæ•°ç»„
+	std::vector<float> confidences;//ç»“æœæ¯ä¸ªidå¯¹åº”ç½®ä¿¡åº¦æ•°ç»„
+	std::vector<cv::Rect> boxes;//æ¯ä¸ªidçŸ©å½¢æ¡†
+	std::vector<cv::Mat> picked_proposals;  //åç»­è®¡ç®—mask
 
 	
 
-	// ´¦Àíbox
+	// å¤„ç†box
 	int net_length = CLASSES + 4 + _segChannels;
 	cv::Mat out1 = cv::Mat(net_length, Num_box, CV_32F, prob);
 
 	start = std::chrono::system_clock::now();
 	for (int i = 0; i < Num_box; i++) {
-		//Êä³öÊÇ1*net_length*Num_box;ËùÒÔÃ¿¸öboxµÄÊôĞÔÊÇÃ¿¸ôNum_boxÈ¡Ò»¸öÖµ£¬¹²net_length¸öÖµ
+		//è¾“å‡ºæ˜¯1*net_length*Num_box;æ‰€ä»¥æ¯ä¸ªboxçš„å±æ€§æ˜¯æ¯éš”Num_boxå–ä¸€ä¸ªå€¼ï¼Œå…±net_lengthä¸ªå€¼
 		cv::Mat scores = out1(Rect(i, 4, 1, CLASSES)).clone();
 		Point classIdPoint;
 		double max_class_socre;
@@ -233,28 +233,29 @@ int main(int argc, char** argv)
 		}
 
 	}
-	//Ö´ĞĞ·Ç×î´óÒÖÖÆÒÔÏû³ı¾ßÓĞ½ÏµÍÖÃĞÅ¶ÈµÄÈßÓàÖØµş¿ò£¨NMS£©
+	//æ‰§è¡Œéæœ€å¤§æŠ‘åˆ¶ä»¥æ¶ˆé™¤å…·æœ‰è¾ƒä½ç½®ä¿¡åº¦çš„å†—ä½™é‡å æ¡†ï¼ˆNMSï¼‰
 	std::vector<int> nms_result;
 	cv::dnn::NMSBoxes(boxes, confidences, CONF_THRESHOLD, NMS_THRESHOLD, nms_result);
 	std::vector<cv::Mat> temp_mask_proposals;
 	std::vector<OutputSeg> output;
+	Rect holeImgRect(0, 0, src.cols, src.rows);
 	for (int i = 0; i < nms_result.size(); ++i) {
 		int idx = nms_result[i];
 		OutputSeg result;
 		result.id = classIds[idx];
 		result.confidence = confidences[idx];
-		result.box = boxes[idx];
+		result.box = boxes[idx]& holeImgRect;
 		output.push_back(result);
 		temp_mask_proposals.push_back(picked_proposals[idx]);
 	}
 
-	// ´¦Àímask
+	// å¤„ç†mask
 	Mat maskProposals;
 	for (int i = 0; i < temp_mask_proposals.size(); ++i)
 		maskProposals.push_back(temp_mask_proposals[i]);
 
 	Mat protos = Mat(_segChannels, _segWidth * _segHeight, CV_32F, prob1);
-	Mat matmulRes = (maskProposals * protos).t();//n*32 32*25600 A*BÊÇÒÔÊıÑ§ÔËËãÖĞ¾ØÕóÏà³ËµÄ·½Ê½ÊµÏÖµÄ£¬ÒªÇóAµÄÁĞÊıµÈÓÚBµÄĞĞÊıÊ±
+	Mat matmulRes = (maskProposals * protos).t();//n*32 32*25600 A*Bæ˜¯ä»¥æ•°å­¦è¿ç®—ä¸­çŸ©é˜µç›¸ä¹˜çš„æ–¹å¼å®ç°çš„ï¼Œè¦æ±‚Açš„åˆ—æ•°ç­‰äºBçš„è¡Œæ•°æ—¶
 	Mat masks = matmulRes.reshape(output.size(), { _segWidth,_segHeight });//n*160*160
 
 	std::vector<Mat> maskChannels;
@@ -266,13 +267,13 @@ int main(int argc, char** argv)
 		dest = 1.0 / (1.0 + dest);//160*160
 		dest = dest(roi);
 		resize(dest, mask, cv::Size(src.cols, src.rows), INTER_NEAREST);
-		//crop----½ØÈ¡boxÖĞµÄmask×÷Îª¸Ãbox¶ÔÓ¦µÄmask
+		//crop----æˆªå–boxä¸­çš„maskä½œä¸ºè¯¥boxå¯¹åº”çš„mask
 		Rect temp_rect = output[i].box;
 		mask = mask(temp_rect) > MASK_THRESHOLD;
 		output[i].boxMask = mask;
 	}
 	end = std::chrono::system_clock::now();
-	std::cout << "ºó´¦ÀíÊ±¼ä£º" << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
+	std::cout << "åå¤„ç†æ—¶é—´ï¼š" << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
 
 	DrawPred(src, output);
 	cv::imshow("output.jpg", src);
